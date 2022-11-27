@@ -1,0 +1,4 @@
+jellyfish==0.9.0
+musicalbeeps==0.2.9
+simpleaudio==1.0.4
+typing==3.7.4.3
