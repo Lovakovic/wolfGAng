@@ -5,9 +5,9 @@ PARAMS = {
     'notes': set({}),
     'octaves': set({}),
     'modifiers': set({}),
-    'max_duration': None,
-    'min_duration': None
+    'durations': []
 }
+duration_always_noted = False
 
 
 class MelodyIter:
@@ -53,6 +53,12 @@ class Melody:
         else:
             raise TypeError(f'Unsupported type {type(other)}')
 
+    def __eq__(self, other):
+        if isinstance(other, Melody):
+            return self.sounds + other.sounds
+        else:
+            raise TypeError(f'Unsupported type {type(other)}')
+
     def __iter__(self):
         return MelodyIter(self)
 
@@ -84,8 +90,8 @@ class Melody:
 
 
 def set_note_gen_params(input_melody: Melody):
-    min_duration = max_duration = None
-
+    global duration_always_noted
+    
     def split_sound_notation(sound: str) -> dict:
         octave = modifier = ''
 
@@ -135,17 +141,8 @@ def set_note_gen_params(input_melody: Melody):
         if len(spliced) > 1:
             sound_notation = split_sound_notation(spliced[0])
             duration = spliced[1]
-
-            # Init the min_duration and max_duration variables
-            if min_duration is None:
-                min_duration = duration
-            if max_duration is None:
-                max_duration = duration
-
-            if duration < min_duration:
-                min_duration = duration
-            if duration > max_duration:
-                max_duration = duration
+            
+            PARAMS['durations'].append(duration)
 
         # Duration is not noted
         else:
@@ -160,13 +157,13 @@ def set_note_gen_params(input_melody: Melody):
     PARAMS['notes'] = list(PARAMS['notes'])
     PARAMS['octaves'] = list(PARAMS['octaves'])
     PARAMS['modifiers'] = list(PARAMS['modifiers'])
-    PARAMS['min_duration'] = round(float(min_duration), 2) if min_duration is not None else None
-    PARAMS['max_duration'] = round(float(max_duration), 2) if max_duration is not None else None
+    
+    # Check if all notes have duration noted
+    duration_always_noted = len(PARAMS['notes']) == len(PARAMS['durations'])
 
 
 def generate_random_note():
     note = random.choice(PARAMS['notes'])
-    duration = ''
 
     octave = modifier = ''
     if note != 'pause':
@@ -179,15 +176,18 @@ def generate_random_note():
         if len(PARAMS['modifiers']) > 0:
             modifier = random.choice(PARAMS['modifiers'])
 
-    # Check if duration is noted
-    if PARAMS['min_duration'] is None and PARAMS['max_duration'] is None:
+    # Not a single note has a duration noted
+    if len(PARAMS['durations']) == 0:
         return note + octave + modifier
 
-    duration = round(random.uniform(PARAMS['min_duration'], PARAMS['max_duration']), 2)
+    duration = random.choice(PARAMS['durations'])
 
-    # Removing leading zero for the fitness function to work correctly
-    if duration < 1:
-        duration = str(duration)[1:]
+    # Duration is always noted
+    if duration_always_noted:
+        return note + octave + modifier + ':' + duration
 
-    duration = str(duration)
-    return note + octave + modifier + ':' + duration
+    # Duration is sometimes noted, so we sometimes generate it
+    if random.random() >= 0.5:
+        return note + octave + modifier + ':' + duration
+    else:
+        return note + octave + modifier

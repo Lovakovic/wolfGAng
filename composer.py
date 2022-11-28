@@ -1,16 +1,17 @@
 from os import system, name
-from typing import List
 from improvements import play
 from composer_util import set_note_gen_params, Melody
 from genetic import set_fitness_reference, generate_genome, play_tournament, perform_crossover, mutate
 
 Gene = str
 Genome = Melody
-Population = List[Melody]
+Population = list[Melody]
 Solution = tuple[Genome, int]
 
 # Parameters to fiddle with
-GENERATION_SIZE = 50
+# NOTE: Make sure that generation size is divisible by winners and k
+# without remainder, as I didn't bother to straighten out the 'edge' cases :)
+GENERATION_SIZE = 16
 tournament_params = {
     'winners': int(GENERATION_SIZE / 4),
     'k': GENERATION_SIZE / 2
@@ -39,8 +40,8 @@ class Composer:
         self.solution_found = False
         self.solution = None
 
-    # The actual driving function for the algorithm
-    def compose(self, play_frequency: int = 1, thread_number=None) -> Solution:
+    # The actual function driving the algorithm
+    def compose(self, play_frequency: int = 1) -> Solution:
         generation_count = 0
 
         self.spawn_first_generation()
@@ -64,17 +65,16 @@ class Composer:
             self.population = sorted(self.population, key=lambda melody: melody.fitness)
             best_genome, worst_genome = self.population[0], self.population[-1]
 
-            # Multithreading status output
-            if thread_number is not None and generation_count % play_frequency == 0 and play_frequency > 1:
-                print(f'Thread {thread_number} at generation No. {generation_count}, '
-                      f'fitness: {self.population[0].fitness}')
-
             # Play ever n generations
-            elif generation_count % play_frequency == 0 and play_frequency != 1:
+            if generation_count % play_frequency == 0 and play_frequency != 1:
                 print(f'Generation No.: {generation_count}, best fitness: {self.population[0].fitness}')
 
                 # print(f'Playing best genome: {best_genome}')
                 # play(self.population[0].sounds)
+
+            if self.population[0].fitness <= 37:
+
+                print('Breakpoint reached.')
 
             winners = play_tournament(tournament_params, self.population, worst_genome)
 

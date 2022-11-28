@@ -1,9 +1,8 @@
 import random
-from typing import List
 from composer_util import generate_random_note, Melody
 
 Genome = Melody
-Population = List[Melody]
+Population = list[Melody]
 FitnessVal = int
 TournamentParams = dict[str]
 
@@ -19,7 +18,7 @@ def generate_genome(length: int) -> Melody:
     return Melody([generate_random_note() for _ in range(length)])
 
 
-def play_tournament(tournament_params: TournamentParams, population: Population, worst_genome: Genome) -> List[Melody]:
+def play_tournament(tournament_params: TournamentParams, population: Population, worst_genome: Genome) -> Population:
     number_of_winners = tournament_params['winners']
     k = tournament_params['k']
 
@@ -32,19 +31,21 @@ def play_tournament(tournament_params: TournamentParams, population: Population,
 
         # Init fitness to the worst fitness in a generation
         best_genome = worst_genome
+        winner_index = 0
 
         while k_count < k:
 
-            random_genome = random.choice(population)
+            random_index = random.randint(0, len(population)-1)
 
             # If the picked genome has better fitness than best_genome we save it
-            if random_genome.fitness < best_genome.fitness:
-                best_genome = random_genome
+            if population[random_index].fitness < best_genome.fitness:
+                best_genome = population[random_index]
+                winner_index = random_index
 
             k_count += 1
 
         # Once we've gone k-times over we select
-        winners.append(best_genome)
+        winners.append(population.pop(winner_index))
 
         winner_counter += 1
 
@@ -106,20 +107,24 @@ def perform_crossover(population: Population, number_of_offspring: int) -> Popul
 def mutate(params: dict, population: Population) -> Population:
     new_population = []
 
-    for genome in population:
-        will_mutate = random.random() <= params['chance']
+    if params['chance'] > 0:
+        for genome in population:
+            will_mutate = random.random() <= params['chance']
 
-        if will_mutate:
+            if will_mutate:
 
-            number_of_mutations = random.randint(1, params['number_of_genes']+1)
+                number_of_mutations = random.randint(1, params['number_of_genes']+1)
 
-            for _ in range(number_of_mutations):
-                gene_index = random.randint(0, len(genome)-1)
+                for _ in range(number_of_mutations):
+                    gene_index = random.randint(0, len(genome)-1)
 
-                genome[gene_index] = generate_random_note()
+                    genome[gene_index] = generate_random_note()
 
-            genome.calculate_fitness(INPUT_MELODY)
+                genome.calculate_fitness(INPUT_MELODY)
 
-        new_population.append(genome)
+            new_population.append(genome)
 
-    return new_population
+        return new_population
+
+    # Return the unmodified population if mutation chance is 0
+    return population

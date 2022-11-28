@@ -1,7 +1,6 @@
 import musicalbeeps
 import threading
 
-
 player = musicalbeeps.Player(volume=0.2, mute_output=True)
 
 
@@ -41,6 +40,7 @@ def play(melody=''):
                 player.play_note(note[0], note[1])
 
         print('Playback finished.')
+        return 0
 
     # Start a new thread for audio playback and give it an event
     event = threading.Event()

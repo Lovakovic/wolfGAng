@@ -1,6 +1,8 @@
-DISCLAIMER: All of the tunes below are copied from musicalbeeps repo: https://github.com/MaelDrapier/musicalbeeps
+DISCLAIMER: Most of the tunes below are copied from musicalbeeps repo: https://github.com/MaelDrapier/musicalbeeps
 Ther only thing I've done is remove neweline characters. Feel free to copy and paste the following tunes into your
 program to test it.
+
+mary_had_a_little_lamb = E D C D E E E D D D E G G E D C D E E E E D D E D C
 
 happy_birthday = C4:.45 C4:.15 D4:.60 C4:.60 F4:.60 E4:1.2 C4:.45 C4:.15 D4:.60 C4:.60 G4:.60 F4:1.2 C4:.45 C4:.15 C5:.60 A4:.60 F4:.60 E4:.60 D4:1.20 B4b:.45 B4b:.15 A4:.60 F4:.60 G4:.60 F4:1.20
 
